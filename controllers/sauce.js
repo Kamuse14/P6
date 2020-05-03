@@ -3,7 +3,7 @@ const fs = require('fs'); //fs: firesystem
 
 exports.createSauce = (req, res, next) => {
 	const sauceObject = JSON.parse(req.body.sauce);
-  //Faut-il supprimer l'id créé auto par MongoDB ?
+ 
   delete sauceObject._id;
 	const sauce = new Sauce({
 	    ...sauceObject, // raccourci pour récupérer tout le contenu du schéma Sauce
@@ -13,9 +13,6 @@ exports.createSauce = (req, res, next) => {
 	sauce.save() // enregistre l'objet dans la bd et retourne une promesse
 	  .then(() => res.status(201).json({ message: 'Sauce enregistrée'})) // 201: création réussie 
 	  .catch(error => res.status(400).json({ error }));
-
-  // Définir ici le tableau des sauces 
-
 };
 
 exports.modifySauce = (req, res, next) => {
@@ -56,12 +53,13 @@ exports.getAllSauces = (req, res, next) => {
 
 
 // exports.likeSauce = (req, res, next) => {
+//   // const sauceObject = JSON.parse(req.body.sauce);
 //   Sauce.like({ usersLiked: req.body.usersLiked})
 //    .then( usersLiked => {
 //      if (usersLiked == userId) {
 //        return res.status(400).json({ error: 'Avis déjà donné'});
 //      }
-//      likes.save() 
+//      likes.save()  //usersLiked.push(userId);
 //        .then(() => res.status(201).json({ message: "J'aime cette sauce !"})) 
 //        .catch(error => res.status(400).json({ error }));
 //     })
@@ -82,16 +80,39 @@ exports.getAllSauces = (req, res, next) => {
 // };
 
 
-// ou bien une seule route avec un switch/case/break ?
-// switch () {
-//   case 'like':
-//     like === 1;
-//     += usersLiked;
-//     break;
-//   case 'dislike':
-//     like === -1;
-//     += usersDisliked;
-//   default:
-//     like === 0;
 
+// ou bien une seule route avec un switch/case/break ?
+// Vérifier que la sauce n'est pas déjà aimée ou détestée :
+// 
+// 
+// exports.likeSauce() {
+//  const like === 0;
+//  switch (like) {
+//    case '1':
+//      for (let i= 0, i<userLiked.length, i++) {
+//        if(i != userId) {
+//          usersLiked.push(userId);
+//        }
+//      }
+//      break;
+//    case '-1':
+//       for (let i= 0, i<userDisliked.length, i++) {
+//        if(i != userId) {
+//          usersDisliked.push(userId);
+//        }
+//       }
+//       break;
+//    default:
+//       like === 0;
+//       for (let i= 0, i<userLiked.length, i++) {
+//        if(userId) {
+//          usersLiked.splice(i, 1);
+//        }
+//       }
+//       for (let i= 0, i<userDisliked.length, i++) {
+//        if(i != userId) {
+//          usersDisliked.splice(i, 1);
+//        }
+//       }
+//   }
 // }
