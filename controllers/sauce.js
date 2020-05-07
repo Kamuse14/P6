@@ -46,73 +46,72 @@ exports.getOneSauce = (req, res, next) => {
 };
 
 exports.getAllSauces = (req, res, next) => { 
- Sauce.find()
+ Sauce.find() // ajouter const like = userLiked.length ?
     .then(sauces => res.status(200).json(sauces))
     .catch(error => res.status(400).json({ error }));
 };
 
 
-// exports.likeSauce = (req, res, next) => {
-//   // const sauceObject = JSON.parse(req.body.sauce);
-//   Sauce.like({ usersLiked: req.body.usersLiked})
-//    .then( usersLiked => {
-//      if (usersLiked == userId) {
-//        return res.status(400).json({ error: 'Avis déjà donné'});
-//      }
-//      likes.save()  //usersLiked.push(userId);
-//        .then(() => res.status(201).json({ message: "J'aime cette sauce !"})) 
-//        .catch(error => res.status(400).json({ error }));
-//     })
-//    .catch(error => res.status(500).json({ error }));
-// };
+exports.likeSauce = (req, res, next) => {
+ switch (req.body.like) {
+  case 1 : 
+    Sauce.updateOne({ _id: req.params.id }, {
+      $inc: { likes: 1},
+      $push: { usersLiked: req.body.userId }
+    })
+      .then(sauce => res.status(200).json({ message: 'Sauce aimée'}))
+      .catch(error => res.status(400).json({ error }));
+    break;
 
-// exports.dislikeSauce = (req, res, next) => {
-//   Sauce.like({ usersDisliked: req.body.usersDisliked})
-//    .then( usersDisliked => {
-//      if (usersDisliked == userId) {
-//        return res.status(400).json({ error: 'Avis déjà donné'});
-//      }
-//      dislikes.save() 
-//        .then(() => res.status(201).json({ message: "Je n'aime pas cette sauce !"})) 
-//        .catch(error => res.status(400).json({ error }));
-//     })
-//    .catch(error => res.status(500).json({ error }));
-// };
+  case -1 :
+    Sauce.updateOne({ _id: req.params.id }, {
+      $inc: { dislikes: 1},
+      $push: { usersDisliked: req.body.userId }
+    })
+      .then(sauce => res.status(200).json({ message: 'Sauce détestée'}))
+      .catch(error => res.status(400).json({ error }));
+    break;
+
+   case 0 : 
+     // if(usersLiked.indexOf(req.body.userId) != -1) {
+     //  Sauce.updateOne({ _id: req.params.id }, {
+     //       $inc: { likes: -1},
+     //       $pull: { usersLiked: req.body.userId }
+     //     })
+     //     .then(sauce => res.status(200).json({ message: 'avis annulé'}))
+     //     .catch(error => res.status(400).json({ error }));
+     //   } else if(usersDisliked.indexOf(req.body.userId) != -1) {
+     //    Sauce.updateOne({ _id: req.params.id }, {
+     //       $inc: { dislikes: -1},
+     //       $pull: { usersDisliked: req.body.userId }
+     //     })
+     //       .then(sauce => res.status(200).json({ message: 'avis annulé'}))
+     //       .catch(error => res.status(400).json({ error }));
+     //   }
+     Sauce.findOne({ usersLiked: req.body.userId })
+       .then(sauce => {
+         Sauce.updateOne({ _id: req.params.id }, {
+           $inc: { likes: -1},
+           $pull: { usersLiked: req.body.userId }
+           //likes: { usersLiked.length }
+         })
+         .then(sauce => res.status(200).json({ message: 'Sauce indifférente'}))
+         .catch(error => res.status(400).json({ error }));
+       })
+       .catch(error => res.status(500).json({ error }));
+     
+     Sauce.findOne({ usersDisliked: req.body.userId })
+       .then(sauce => {
+         Sauce.updateOne({ _id: req.params.id }, {
+           $inc: { dislikes: -1},
+           $pull: { usersDisliked: req.body.userId }
+         })
+           .then(sauce => res.status(200).json({ message: 'Sauce indifférente'}))
+           .catch(error => res.status(400).json({ error }));
+       })
+       .catch(error => res.status(500).json({ error })); 
+     break;
+  }
+};
 
 
-
-// ou bien une seule route avec un switch/case/break ?
-// Vérifier que la sauce n'est pas déjà aimée ou détestée :
-// 
-// 
-// exports.likeSauce() {
-//  const like === 0;
-//  switch (like) {
-//    case '1':
-//      for (let i= 0, i<userLiked.length, i++) {
-//        if(i != userId) {
-//          usersLiked.push(userId);
-//        }
-//      }
-//      break;
-//    case '-1':
-//       for (let i= 0, i<userDisliked.length, i++) {
-//        if(i != userId) {
-//          usersDisliked.push(userId);
-//        }
-//       }
-//       break;
-//    default:
-//       like === 0;
-//       for (let i= 0, i<userLiked.length, i++) {
-//        if(userId) {
-//          usersLiked.splice(i, 1);
-//        }
-//       }
-//       for (let i= 0, i<userDisliked.length, i++) {
-//        if(i != userId) {
-//          usersDisliked.splice(i, 1);
-//        }
-//       }
-//   }
-// }
