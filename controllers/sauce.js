@@ -53,65 +53,53 @@ exports.getAllSauces = (req, res, next) => {
 
 
 exports.likeSauce = (req, res, next) => {
- switch (req.body.like) {
-  case 1 : 
-    Sauce.updateOne({ _id: req.params.id }, {
-      $inc: { likes: 1},
-      $push: { usersLiked: req.body.userId }
-    })
-      .then(sauce => res.status(200).json({ message: 'Sauce aimée'}))
-      .catch(error => res.status(400).json({ error }));
-    break;
+ Sauce.findOne({ _id: req.params.id})
+    .then(sauce => {
+       switch (req.body.like) {
+          case 1 : 
+            if (!sauce.usersLiked.includes(req.body.userId )) {
+              Sauce.updateOne({ _id: req.params.id }, {
+                $inc: { likes: 1},
+                $push: { usersLiked: req.body.userId }
+              })
+                .then(sauce => res.status(200).json({ message: 'Sauce aimée'}))
+                .catch(error => res.status(400).json({ error }));
+            }
+            break;
 
-  case -1 :
-    Sauce.updateOne({ _id: req.params.id }, {
-      $inc: { dislikes: 1},
-      $push: { usersDisliked: req.body.userId }
-    })
-      .then(sauce => res.status(200).json({ message: 'Sauce détestée'}))
-      .catch(error => res.status(400).json({ error }));
-    break;
+          case -1 :
+            if (!sauce.usersDisliked.includes(req.body.userId )) {
+              Sauce.updateOne({ _id: req.params.id }, {
+                $inc: { dislikes: 1},
+                $push: { usersDisliked: req.body.userId }
+              })
+                .then(sauce => res.status(200).json({ message: 'Sauce détestée'}))
+                .catch(error => res.status(400).json({ error }));
+            }
+            break;
 
-   case 0 : 
-     // if(usersLiked.indexOf(req.body.userId) != -1) {
-     //  Sauce.updateOne({ _id: req.params.id }, {
-     //       $inc: { likes: -1},
-     //       $pull: { usersLiked: req.body.userId }
-     //     })
-     //     .then(sauce => res.status(200).json({ message: 'avis annulé'}))
-     //     .catch(error => res.status(400).json({ error }));
-     //   } else if(usersDisliked.indexOf(req.body.userId) != -1) {
-     //    Sauce.updateOne({ _id: req.params.id }, {
-     //       $inc: { dislikes: -1},
-     //       $pull: { usersDisliked: req.body.userId }
-     //     })
-     //       .then(sauce => res.status(200).json({ message: 'avis annulé'}))
-     //       .catch(error => res.status(400).json({ error }));
-     //   }
-     Sauce.findOne({ usersLiked: req.body.userId })
-       .then(sauce => {
-         Sauce.updateOne({ _id: req.params.id }, {
-           $inc: { likes: -1},
-           $pull: { usersLiked: req.body.userId }
-           //likes: { usersLiked.length }
-         })
-         .then(sauce => res.status(200).json({ message: 'Sauce indifférente'}))
-         .catch(error => res.status(400).json({ error }));
-       })
-       .catch(error => res.status(500).json({ error }));
-     
-     Sauce.findOne({ usersDisliked: req.body.userId })
-       .then(sauce => {
-         Sauce.updateOne({ _id: req.params.id }, {
-           $inc: { dislikes: -1},
-           $pull: { usersDisliked: req.body.userId }
-         })
-           .then(sauce => res.status(200).json({ message: 'Sauce indifférente'}))
-           .catch(error => res.status(400).json({ error }));
-       })
-       .catch(error => res.status(500).json({ error })); 
-     break;
-  }
+          case 0 : 
+            if (sauce.usersLiked.includes(req.body.userId )) {
+              Sauce.updateOne({ _id: req.params.id }, {
+                $inc: { likes: -1},
+                $pull: { usersLiked: req.body.userId }
+              })
+                .then(sauce => res.status(200).json({ message: 'Sauce indifférente'}))
+                .catch(error => res.status(400).json({ error }));
+            } else if(sauce.usersDisliked.includes(req.body.userId )) {
+              Sauce.updateOne({ _id: req.params.id }, {
+                $inc: { dislikes: -1},
+                $pull: { usersDisliked: req.body.userId }
+              })
+                .then(sauce => res.status(200).json({ message: 'Sauce indifférente'}))
+                .catch(error => res.status(400).json({ error }));
+            }
+            break;
+       }
+    })
 };
+
+      
+  
 
 
