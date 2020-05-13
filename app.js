@@ -3,13 +3,13 @@ const bodyParser = require('body-parser');
 const app = express();
 const mongoose = require('mongoose');
 const path = require('path'); // donne le chemin du fichier
-//const env = require('dotenv');
-//env.config();
+const env = require('dotenv');
+env.config();
 
 const sauceRoutes = require('./routes/sauce');
 const userRoutes = require('./routes/user');
 
-mongoose.connect('mongodb+srv://Kamuse14:Mozart1971@cluster0-q8tcw.mongodb.net/test?retryWrites=true&w=majority',
+mongoose.connect('mongodb+srv://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@cluster0-q8tcw.mongodb.net/piquante?retryWrites=true&w=majority',
   { useNewUrlParser: true,
     useUnifiedTopology: true })
   .then(() => console.log('Connexion à MongoDB réussie !'))
