@@ -1,18 +1,20 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const app = express();
 const mongoose = require('mongoose');
 const path = require('path'); // donne le chemin du fichier
+//const env = require('dotenv');
+//env.config();
 
 const sauceRoutes = require('./routes/sauce');
 const userRoutes = require('./routes/user');
-
-const app = express();
 
 mongoose.connect('mongodb+srv://Kamuse14:Mozart1971@cluster0-q8tcw.mongodb.net/test?retryWrites=true&w=majority',
   { useNewUrlParser: true,
     useUnifiedTopology: true })
   .then(() => console.log('Connexion à MongoDB réussie !'))
   .catch(() => console.log('Connexion à MongoDB échouée !'));
+mongoose.set('useCreateIndex', true);
 
 app.use((req, res, next) => { // "connexion" des deux localhost 3000 et 4200
   res.setHeader('Access-Control-Allow-Origin', '*'); // * peut-être à changer pour deux niveaux d'accès

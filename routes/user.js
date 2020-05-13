@@ -4,6 +4,6 @@ const userCtrl = require('../controllers/user'); // création du controlleur pou
 
 // On crée 2 routes POST
 router.post('/signup', userCtrl.signup);
-router.post('/login', userCtrl.login);
+router.post('/login', userCtrl.login); 
 
 module.exports = router; // on exporte ce routeur
