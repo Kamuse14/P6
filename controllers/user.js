@@ -2,7 +2,6 @@ const bcrypt = require('bcrypt');// package de cryptage pour les mdp
 const jwt = require('jsonwebtoken');
 
 const emailValidator = require("email-validator"); // format email
-const passwordValidator = require('password-validator'); // format password
 
 // Création de nouveaux Users dans la db à partir de la connexion de l'inscription 
 const User = require('../models/User'); //enregistrer et lire
@@ -15,23 +14,9 @@ const User = require('../models/User'); //enregistrer et lire
  * @return {[type]}        [description]
  */
 exports.signup = (req, res, next) => { 
-	// if (!emailValidator.validate(req.body.email)) {
-	// 	 return res.status(400).json({ error: "Format de l'email invalide" });
-	// }
-
-	// const passwordSchema = new passwordValidator();
-	// passwordSchema
-	// 	.is().min(8)
-	// 	.is().max(100)
-	// 	.has().uppercase()
-	// 	.has().lowercase()
-	// 	.has().digits()                                 
-	// 	.has().not().spaces()
-		                           
-	// 	.has().not(['=']); 
-	// if (!passwordValidator.validate(req.body.password)) {
-	// 	 return res.status(400).json({ error: "Mot de passe invalide" });
-	// }
+	if (!emailValidator.validate(req.body.email)) {
+		 return res.status(400).json({ error: "Format de l'email invalide" });
+	}
 
 	bcrypt.hash(req.body.password, 10) //on hash le mdp en async
 		.then(hash => {
