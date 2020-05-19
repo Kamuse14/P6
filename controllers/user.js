@@ -1,12 +1,24 @@
-// package de cryptage pour les mdp :  npm install --save bcrypt
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt');// package de cryptage pour les mdp 
 const jwt = require('jsonwebtoken');
+
+const emailValidator = require("email-validator"); // format email
+
 // Création de nouveaux Users dans la db à partir de la connexion de l'inscription 
 const User = require('../models/User'); //enregistrer et lire
 
+/**
+ * Gère l'inscription d'un utilisateur
+ * @param  {[type]}   req  [description]
+ * @param  {[type]}   res  [description]
+ * @param  {Function} next [description]
+ * @return {[type]}        [description]
+ */
+exports.signup = (req, res, next) => { 
+	if (!emailValidator.validate(req.body.email)) {
+		 return res.status(400).json({ error: "Format de l'email invalide" });
+	}
 
-exports.signup = (req, res, next) => { //on hash le mdp en async
-	bcrypt.hash(req.body.password, 10)
+	bcrypt.hash(req.body.password, 10) //on hash le mdp en async
 		.then(hash => {
 			const user = new User({
 				email: req.body.email, // adresse dans le corps de la requête
@@ -21,11 +33,12 @@ exports.signup = (req, res, next) => { //on hash le mdp en async
 
 exports.login = (req, res, next) => {
 	User.findOne({ email: req.body.email })
-		.then(user => { // on vérifie si l'U existe déjà
-			if (!user) {
+		.then(user => { 
+			if (!user) { // on vérifie si l'U existe déjà
 				return res.status(401).json({ error: 'Utilisateur non trouvé'});
 			}
-			// on compare le mdp hashé et celui rentré par l'U
+	
+			// on compare le mdp rentré par l'U  et celui hashé
 			bcrypt.compare(req.body.password, user.password)
 				.then(valid => {
 					if (!valid) {
@@ -35,7 +48,7 @@ exports.login = (req, res, next) => {
 						userId: user._id, 
 						token: jwt.sign(
 							{ userId: user._id },
-							'RANDOM_TOKEN_SECRET', // clé secrète pour l'encodage (à modifier ?)
+							'RANDOM_TOKEN_SECRET', // clé secrète pour l'encodage
 							{ expiresIn: '24h'}  // argument de configuration (expiration)
 						)
 					});

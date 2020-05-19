@@ -1,9 +1,9 @@
 const Sauce = require('../models/Sauce');
-const fs = require('fs'); //fs: firesystem
+const fs = require('fs'); //fs: filesystem
 
 exports.createSauce = (req, res, next) => {
 	const sauceObject = JSON.parse(req.body.sauce);
-  //Faut-il supprimer l'id créé auto par MongoDB ?
+ 
   delete sauceObject._id;
 	const sauce = new Sauce({
 	    ...sauceObject, // raccourci pour récupérer tout le contenu du schéma Sauce
@@ -13,9 +13,6 @@ exports.createSauce = (req, res, next) => {
 	sauce.save() // enregistre l'objet dans la bd et retourne une promesse
 	  .then(() => res.status(201).json({ message: 'Sauce enregistrée'})) // 201: création réussie 
 	  .catch(error => res.status(400).json({ error }));
-
-  // Définir ici le tableau des sauces 
-
 };
 
 exports.modifySauce = (req, res, next) => {
@@ -45,7 +42,7 @@ exports.deleteSauce = (req, res, next) => {
 exports.getOneSauce = (req, res, next) => {
   Sauce.findOne({ _id: req.params.id})
     .then(sauce => res.status(200).json(sauce))
-    .catch(error => res.status(404).json({ error })); // 404: objet non trouvé
+    .catch(error => res.status(404).json({ error })); // 404 (objet non trouvé)
 };
 
 exports.getAllSauces = (req, res, next) => { 
@@ -55,43 +52,54 @@ exports.getAllSauces = (req, res, next) => {
 };
 
 
-// exports.likeSauce = (req, res, next) => {
-//   Sauce.like({ usersLiked: req.body.usersLiked})
-//    .then( usersLiked => {
-//      if (usersLiked == userId) {
-//        return res.status(400).json({ error: 'Avis déjà donné'});
-//      }
-//      likes.save() 
-//        .then(() => res.status(201).json({ message: "J'aime cette sauce !"})) 
-//        .catch(error => res.status(400).json({ error }));
-//     })
-//    .catch(error => res.status(500).json({ error }));
-// };
+exports.likeSauce = (req, res, next) => {
+ Sauce.findOne({ _id: req.params.id})
+    .then(sauce => {
+       switch (req.body.like) {
+          case 1 : 
+            if (!sauce.usersLiked.includes(req.body.userId )) {
+              Sauce.updateOne({ _id: req.params.id }, {
+                $inc: { likes: 1},
+                $push: { usersLiked: req.body.userId }
+              })
+                .then(sauce => res.status(200).json({ message: 'Sauce aimée'}))
+                .catch(error => res.status(400).json({ error }));
+            }
+            break;
 
-// exports.dislikeSauce = (req, res, next) => {
-//   Sauce.like({ usersDisliked: req.body.usersDisliked})
-//    .then( usersDisliked => {
-//      if (usersDisliked == userId) {
-//        return res.status(400).json({ error: 'Avis déjà donné'});
-//      }
-//      dislikes.save() 
-//        .then(() => res.status(201).json({ message: "Je n'aime pas cette sauce !"})) 
-//        .catch(error => res.status(400).json({ error }));
-//     })
-//    .catch(error => res.status(500).json({ error }));
-// };
+          case -1 :
+            if (!sauce.usersDisliked.includes(req.body.userId )) {
+              Sauce.updateOne({ _id: req.params.id }, {
+                $inc: { dislikes: 1},
+                $push: { usersDisliked: req.body.userId }
+              })
+                .then(sauce => res.status(200).json({ message: 'Sauce détestée'}))
+                .catch(error => res.status(400).json({ error }));
+            }
+            break;
+
+          case 0 : 
+            if (sauce.usersLiked.includes(req.body.userId)) {
+              Sauce.updateOne({ _id: req.params.id }, {
+                $inc: { likes: -1},
+                $pull: { usersLiked: req.body.userId }
+              })
+                .then(sauce => res.status(200).json({ message: 'Sauce indifférente'}))
+                .catch(error => res.status(400).json({ error }));
+            } else if(sauce.usersDisliked.includes(req.body.userId )) {
+              Sauce.updateOne({ _id: req.params.id }, {
+                $inc: { dislikes: -1},
+                $pull: { usersDisliked: req.body.userId }
+              })
+                .then(sauce => res.status(200).json({ message: 'Sauce indifférente'}))
+                .catch(error => res.status(400).json({ error }));
+            }
+            break;
+       }
+    })
+};
+
+      
+  
 
 
-// ou bien une seule route avec un switch/case/break ?
-// switch () {
-//   case 'like':
-//     like === 1;
-//     += usersLiked;
-//     break;
-//   case 'dislike':
-//     like === -1;
-//     += usersDisliked;
-//   default:
-//     like === 0;
-
-// }
