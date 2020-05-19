@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const path = require('path'); // donne le chemin du fichier
 const env = require('dotenv');
 env.config();
-//const helmet = require('helmet');
+const helmet = require('helmet');
 
 
 const sauceRoutes = require('./routes/sauce');
@@ -27,12 +27,12 @@ app.use((req, res, next) => { // "connexion" des deux localhost 3000 et 4200
 
 app.use(bodyParser.json()); // "use" : pour toutes les routes de l'app
 
-// app.use(helmet());
-// app.use(helmet.contentSecurityPolicy({
-// 	directives:  {
-// 		defaultSrc: ["'self'"]
-// 	}
-// }));
+app.use(helmet());
+app.use(helmet.contentSecurityPolicy({
+	directives:  {
+		defaultSrc: ["'self'"]
+	}
+}));
 
 app.use('/images', express.static(path.join(__dirname, 'images')));
 

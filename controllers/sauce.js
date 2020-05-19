@@ -1,5 +1,5 @@
 const Sauce = require('../models/Sauce');
-const fs = require('fs'); //fs: firesystem
+const fs = require('fs'); //fs: filesystem
 
 exports.createSauce = (req, res, next) => {
 	const sauceObject = JSON.parse(req.body.sauce);
@@ -42,11 +42,11 @@ exports.deleteSauce = (req, res, next) => {
 exports.getOneSauce = (req, res, next) => {
   Sauce.findOne({ _id: req.params.id})
     .then(sauce => res.status(200).json(sauce))
-    .catch(error => res.status(404).json({ error })); // 404: objet non trouvé
+    .catch(error => res.status(404).json({ error })); // 404 (objet non trouvé)
 };
 
 exports.getAllSauces = (req, res, next) => { 
- Sauce.find() // ajouter const like = userLiked.length ?
+ Sauce.find()
     .then(sauces => res.status(200).json(sauces))
     .catch(error => res.status(400).json({ error }));
 };
@@ -79,7 +79,7 @@ exports.likeSauce = (req, res, next) => {
             break;
 
           case 0 : 
-            if (sauce.usersLiked.includes(req.body.userId )) {
+            if (sauce.usersLiked.includes(req.body.userId)) {
               Sauce.updateOne({ _id: req.params.id }, {
                 $inc: { likes: -1},
                 $pull: { usersLiked: req.body.userId }
