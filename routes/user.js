@@ -4,7 +4,7 @@ const userCtrl = require('../controllers/user'); // création du controlleur pou
 
 const bouncer = require("express-bouncer")(1000, 900000, 2); // contre-attaque bruteforce
 bouncer.blocked = (req, res, next, remaining) => {
-	res.send (429, "Too many requests have been made, " +
+	res.status(429).send ("Too many requests have been made, " +
 		"please wait " + remaining / 1000 + " seconds");
 };
 
