@@ -1,22 +1,23 @@
 const Sauce = require('../models/Sauce');
 const fs = require('fs'); //fs: filesystem
 
+// création de la sauce
 exports.createSauce = (req, res, next) => {
 	const sauceObject = JSON.parse(req.body.sauce);
- 
   delete sauceObject._id;
 	const sauce = new Sauce({
-	    ...sauceObject, // raccourci pour récupérer tout le contenu du schéma Sauce
+	    ...sauceObject, 
 	    imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}` 
- // http://localhost:3000/images/"nom du fichier image"
   });
-	sauce.save() // enregistre l'objet dans la bd et retourne une promesse
-	  .then(() => res.status(201).json({ message: 'Sauce enregistrée'})) // 201: création réussie 
+	// enregistre l'objet dans la bd et retourne une promesse
+  sauce.save() 
+	  .then(() => res.status(201).json({ message: 'Sauce enregistrée'}))  
 	  .catch(error => res.status(400).json({ error }));
 };
 
+// modification de la sauce (si l'utilisateur en est la créateur)
 exports.modifySauce = (req, res, next) => {
-  const sauceObject = req.file ? // opérateur ternaire (s'il existe ou non)
+  const sauceObject = req.file ? 
     { 
       ...JSON.parse(req.body.sauce),
       imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}` 
@@ -26,6 +27,7 @@ exports.modifySauce = (req, res, next) => {
     .catch(error => res.status(400).json({ error })); 
 };
 
+// suppression de la sauce (si l'utilisateur en est la créateur)
 exports.deleteSauce = (req, res, next) => {
   Sauce.findOne({ _id: req.params.id })
     .then(sauce => {
@@ -39,23 +41,26 @@ exports.deleteSauce = (req, res, next) => {
     .catch(error => res.status(500).json({ error }));
 };
 
+// lecture d'une sauce
 exports.getOneSauce = (req, res, next) => {
   Sauce.findOne({ _id: req.params.id})
     .then(sauce => res.status(200).json(sauce))
     .catch(error => res.status(404).json({ error })); // 404 (objet non trouvé)
 };
 
+// lecture de toutes les sauces
 exports.getAllSauces = (req, res, next) => { 
  Sauce.find()
     .then(sauces => res.status(200).json(sauces))
     .catch(error => res.status(400).json({ error }));
 };
 
-
+// choix de l'utilisateur
 exports.likeSauce = (req, res, next) => {
  Sauce.findOne({ _id: req.params.id})
     .then(sauce => {
        switch (req.body.like) {
+          // l'utilisateur aime la sauce
           case 1 : 
             if (!sauce.usersLiked.includes(req.body.userId )) {
               Sauce.updateOne({ _id: req.params.id }, {
@@ -67,6 +72,7 @@ exports.likeSauce = (req, res, next) => {
             }
             break;
 
+          // l'utilisateur n'aime pas la sauce
           case -1 :
             if (!sauce.usersDisliked.includes(req.body.userId )) {
               Sauce.updateOne({ _id: req.params.id }, {
@@ -78,6 +84,7 @@ exports.likeSauce = (req, res, next) => {
             }
             break;
 
+          // l'utilisateur annule son choix
           case 0 : 
             if (sauce.usersLiked.includes(req.body.userId)) {
               Sauce.updateOne({ _id: req.params.id }, {
