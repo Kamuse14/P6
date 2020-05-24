@@ -1,5 +1,5 @@
 const http = require('http');
-const app = require('./app'); //on importe l'application
+const app = require('./app');
 
 const normalizePort = val => { // renvoie un port valide
   const port = parseInt(val, 10); // un nombre (pas un string)
@@ -12,11 +12,12 @@ const normalizePort = val => { // renvoie un port valide
   }
   return false;
 };
-
+// on dit au serveur sur quel port elle doit tourner
 const port = normalizePort(process.env.PORT || '3000');
-app.set('port', port); // on dit au serveur sur quel port elle doit tourner
+app.set('port', port); 
 
-const errorHandler = error => { //recherche les différentes erreurs et les gère
+//recherche les différentes erreurs et les gère
+const errorHandler = error => { 
   if (error.syscall !== 'listen') {
     throw error;
   }
@@ -38,12 +39,14 @@ const errorHandler = error => { //recherche les différentes erreurs et les gèr
 
 const server = http.createServer(app);
 
+
 server.on('error', errorHandler);
-server.on('listening', () => { //écouteur d'évènements consignant le port sur lequel le serveur s'exécute
+//écouteur d'évènements consignant le port sur lequel le serveur s'exécute
+server.on('listening', () => { 
   const address = server.address();
   const bind = typeof address === 'string' ? 'pipe ' + address : 'port ' + port;
   console.log('Listening on ' + bind);
 });
 
-server.listen(port); //si l'environnement sur lequel tourne le serveur envoie un port à utiliser, sinon 3000 par défaut
-
+//si l'environnement sur lequel tourne le serveur envoie un port à utiliser, sinon 3000 par défaut
+server.listen(port); 

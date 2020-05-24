@@ -1,24 +1,25 @@
-const bcrypt = require('bcrypt');// package de cryptage pour les mdp 
+// package de cryptage pour les mdp 
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const emailValidator = require("email-validator"); // format email
 
 // Création de nouveaux Users dans la db à partir de la connexion de l'inscription 
-const User = require('../models/User'); //enregistrer et lire
+const User = require('../models/User');
 
 /**
- * Gère l'inscription d'un utilisateur
- * @param  {[type]}   req  [description]
- * @param  {[type]}   res  [description]
- * @param  {Function} next [description]
- * @return {[type]}        [description]
+ * inscription d'un nouvel utilisateur
+ * @param  {object}   req  
+ * @param  {string}   res  
+ * @param  {Function} next 
+ * @return {void}        
  */
 exports.signup = (req, res, next) => { 
 	if (!emailValidator.validate(req.body.email)) {
 		 return res.status(400).json({ error: "Format de l'email invalide" });
 	}
-
-	bcrypt.hash(req.body.password, 10) //on hash le mdp en async
+	//on hash le mdp en async
+	bcrypt.hash(req.body.password, 10) 
 		.then(hash => {
 			const user = new User({
 				email: req.body.email, // adresse dans le corps de la requête
@@ -31,6 +32,13 @@ exports.signup = (req, res, next) => {
 		.catch(error => res.status(500).json({ error }));
 };
 
+/**
+ * connexion d'un utilisateur ayant déjà un compte
+ * @param  {object}   req  
+ * @param  {string}   res  
+ * @param  {Function} next 
+ * @return {void}        
+ */
 exports.login = (req, res, next) => {
 	User.findOne({ email: req.body.email })
 		.then(user => { 
